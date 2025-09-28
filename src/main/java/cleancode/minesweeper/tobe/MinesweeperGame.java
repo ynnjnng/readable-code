@@ -28,7 +28,7 @@ public class MinesweeperGame {
         while (true) {
             
             board.print();
-
+ 
             if (doesUserWin()) {
                 System.out.println("지뢰를 모두 찾았습니다. GAME CLEAR!");
                 break;

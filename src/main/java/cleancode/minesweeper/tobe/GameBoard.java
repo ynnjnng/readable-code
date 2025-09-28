@@ -117,6 +117,7 @@ public class GameBoard {
         //     }
         // }
         // return true;
+        
         return Arrays.stream(this.board).flatMap(Arrays::stream).noneMatch(SIGN_CLOSED_CELL::equals);
     }
 
