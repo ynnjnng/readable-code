@@ -26,31 +26,42 @@ public class MinesweeperGame {
         board.printLandMine();
 
         while (true) {
-            
-            board.print();
+            try {
+                board.print();
  
-            if (doesUserWin()) {
-                System.out.println("지뢰를 모두 찾았습니다. GAME CLEAR!");
-                break;
-            }
-            if (doesUserLose()) {
-                System.out.println("지뢰를 밟았습니다. GAME OVER!");
-                break;
-            }
-            System.out.println();
-        
-            String cellInput = getCellInput();
-            int col = getCol(cellInput.charAt(0));
-            int row = getRow(cellInput.charAt(1));
+                if (doesUserWin()) {
+                    System.out.println("지뢰를 모두 찾았습니다. GAME CLEAR!");
+                    break;
+                }
+                if (doesUserLose()) {
+                    System.out.println("지뢰를 밟았습니다. GAME OVER!");
+                    break;
+                }
+                System.out.println();
+            
+                String cellInput = getCellInput();
+                int col = getCol(cellInput.charAt(0));
+                int row = getRow(cellInput.charAt(1));
 
-            String action = getActionInput();
-            doAction(board, action, row, col);
+                String action = getActionInput();
+                doAction(board, action, row, col);
+
+            } catch (AppException e) {
+                System.out.println(e.getMessage());
+            } catch (Exception e) {
+                System.out.println("시스템 오류가 발생했습니다.");
+                return;
+            }
+            
         }
     }
 
     private static String getActionInput() {
         System.out.println("선택한 셀에 대한 행위를 선택하세요. (1: 오픈, 2: 깃발 꽂기)");
         String action = scanner.nextLine();
+        if (!ACTION_OPEN.equals(action) && !ACTION_FLAG.equals(action)) {
+            throw new AppException("잘못된 행위 입력값 입니다.");
+        }
         return action;
     }
 
@@ -101,13 +112,17 @@ public class MinesweeperGame {
     }
 
     private static int getRow(char r) {
-        return Character.getNumericValue(r) - 1;
+        int rowIdx = Character.getNumericValue(r) - 1;
+        if (rowIdx < 0 || rowIdx >= ROW_COUNT) {
+            throw new AppException("잘못된 입력값 입니다.");
+        }
+        return rowIdx;
     }
 
     private static int getCol(char c) {
         int col = c - 'a';
-        if (col < 0 || col > 9) {
-            col = -1;
+        if (col < 0 || col >= COL_COUNT) {
+            throw new AppException("잘못된 입력값 입니다.");
         }
         return col;
     }
