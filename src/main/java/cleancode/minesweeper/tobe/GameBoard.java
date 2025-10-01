@@ -5,46 +5,42 @@ import java.util.Random;
 
 public class GameBoard {
     
-    public static final String SIGN_FLAG = "⚑";
-    public static final String SIGN_CLOSED_CELL  = "□";
-    public static final String SIGN_OPEND_CELL = "■";
-    public static final String SIGN_LAND_MINE  = "☼";
+   
 
-    private final String[][] board;
-    private final Integer[][] landMineCounts;
-    private final boolean[][] landMines;
+    private final Cell[][] board;
+    // private final Integer[][] landMineCounts;
+    // private final boolean[][] landMines;
 
     private final int rowSize, colSize, landMineCount;
+    
+    
+    private boolean isFindLandMine = false;
 
     public GameBoard(int rowSize, int colSize, int landMineCount) {
         this.rowSize = rowSize;
         this.colSize = colSize;
         this.landMineCount = landMineCount;
-        this.board = new String[this.rowSize][this.colSize];
-        this.landMineCounts = new Integer[this.rowSize][this.colSize];
-        this.landMines = new boolean[this.rowSize][this.colSize];
+        this.board = new Cell[this.rowSize][this.colSize];
+        // this.landMineCounts = new Integer[this.rowSize][this.colSize];
+        // this.landMines = new boolean[this.rowSize][this.colSize];
     }
 
     public void initialize() {
-        for (int row = 0; row < rowSize; row++) {
-            for (int col = 0; col < colSize; col++) {
-                this.board[row][col] = SIGN_CLOSED_CELL;
-            }
-        }
-
+        
+        // 폭탄 먼저 설치
         for (int i = 0; i < landMineCount; i++) {
             int col = new Random().nextInt(colSize);
             int row = new Random().nextInt(rowSize);
-            this.landMines[row][col] = true;
+            //this.landMines[row][col] = true;
+            this.board[row][col] = Cell.ofLandMine();
         }
         
         for (int row = 0; row < rowSize; row++) {
             for (int col = 0; col < colSize; col++) {
                 if (isLandMineCell(row, col)) {
-                    this.landMineCounts[row][col] = 0;
                     continue;
                 }
-                this.landMineCounts[row][col] = this.getNearbyLandMineCount(row, col);
+                this.board[row][col] = Cell.ofNearbyLandMineCount(this.getNearbyLandMineCount(row, col));
             }
         }
     }
@@ -83,7 +79,7 @@ public class GameBoard {
         for (int row = 0; row < rowSize; row++) {
             System.out.printf("%d  ", row + 1);
             for (int col = 0; col < colSize; col++) {
-                System.out.print(this.board[row][col] + " ");
+                System.out.print(this.board[row][col].getSign() + " ");
             }
             System.out.println();
         }
@@ -94,21 +90,24 @@ public class GameBoard {
         for (int row = 0; row < rowSize; row++) {
             System.out.printf("%d  ", row + 1);
             for (int col = 0; col < colSize; col++) {
-                System.out.print((this.landMines[row][col] ? "1" : "0") + " ");
+                System.out.print((this.board[row][col].isLandMineCell() ? "1" : "0") + " ");
             }
             System.out.println();
         }
     }
 
-    public boolean isLandMineCell(int row, int col) {
+    private boolean isLandMineCell(int row, int col) {
         if (row < 0 || row >= rowSize || col < 0 || col >= colSize) {
             return false;
         }
-        return this.landMines[row][col];
+        if (this.board[row][col] == null) {
+            return false;
+        }
+        return this.board[row][col].isLandMineCell();
     }
 
     
-    public boolean isAllOpend() {
+    public boolean isAllChecked() {
         // for (int row = 0; row < this.rowSize; row++) {
         //     for (int col = 0; col < this.colSize; col++) {
         //         if (this.board[row][col].equals(SIGN_CLOSED_CELL)) {
@@ -118,29 +117,22 @@ public class GameBoard {
         // }
         // return true;
         
-        return Arrays.stream(this.board).flatMap(Arrays::stream).noneMatch(SIGN_CLOSED_CELL::equals);
+        return Arrays.stream(this.board).flatMap(Arrays::stream).allMatch(cell -> cell.isChecked());
     }
 
-    public boolean isCellFlag(int row, int col) {
-        return SIGN_FLAG.equals(this.board[row][col]);
-    }
-
-    public boolean isCellLandMine(int row, int col) {
-        return SIGN_LAND_MINE.equals(this.board[row][col]);
-    }
-
-    public boolean isCellOpend(int row, int col) {
-        return SIGN_OPEND_CELL.equals(this.board[row][col]);
-    }
 
     public void doActionFlag(int row, int col) {
-        board[row][col] = SIGN_FLAG;
+        // board[row][col] = SIGN_FLAG;
+        board[row][col].flag();
     }
 
     public void doActionOpen(int row, int col) {
-        if (isLandMineCell(row, col)) {
-            board[row][col] = SIGN_LAND_MINE;
+        if (this.board[row][col].isLandMineCell()) {
+            // board[row][col] = SIGN_LAND_MINE;
+            this.board[row][col].open();
+            this.isFindLandMine = true;
         } else {
+            // 첫번쨰 오픈은 지뢰셀을 
             open(row, col);
         }
     }
@@ -151,19 +143,21 @@ public class GameBoard {
             return;
         }
         // 이미 열린 셀이거나 깃발이 꽂힌 셀은 무시
-        if (!this.board[row][col].equals(SIGN_CLOSED_CELL)) {
+        // -> 이미 체크한 셀은 무시
+        if (this.board[row][col].isChecked()) {
             return;
         }
         // 지뢰 셀은 열지 않음
-        if (this.landMines[row][col]) {
+        if (this.board[row][col].isLandMineCell()) {
             return;
         }
-        // 주변 지뢰 개수가 0이 아니면 숫자 표시 후 종료
-        if (this.landMineCounts[row][col] != 0) {
-            this.board[row][col] = String.valueOf(this.landMineCounts[row][col]);
+
+        // 오픈!!
+        this.board[row][col].open();
+
+        // 숫자 셀이면
+        if (this.board[row][col].hasNearbyLandMineCount()) {
             return;
-        } else {
-            this.board[row][col] = SIGN_OPEND_CELL;
         }
         // 8방향 재귀 오픈
         open(row - 1, col - 1);
@@ -174,5 +168,9 @@ public class GameBoard {
         open(row + 1, col - 1);
         open(row + 1, col);
         open(row + 1, col + 1);
+    }
+
+    public boolean isFindLandMine() {
+        return this.isFindLandMine;
     }
 }

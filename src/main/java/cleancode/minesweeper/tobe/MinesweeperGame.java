@@ -95,10 +95,10 @@ public class MinesweeperGame {
             return;
         }
 
-        if (board.isLandMineCell(row, col) && !board.isCellFlag(row, col)) {
+        if (board.isFindLandMine()) {
             setGameSatatus(LOSE);
         }
-        else if (board.isAllOpend()) {
+        else if (board.isAllChecked()) {
             setGameSatatus(WIN);
         }
     }
