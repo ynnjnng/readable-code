@@ -1,29 +1,24 @@
 package cleancode.minesweeper.tobe;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
+
+import cleancode.minesweeper.tobe.gamelevel.GameLevel;
 
 public class GameBoard {
     
-   
-
     private final Cell[][] board;
-    // private final Integer[][] landMineCounts;
-    // private final boolean[][] landMines;
 
     private final int rowSize, colSize, landMineCount;
-    
-    
-    
     private boolean isFindLandMine = false;
 
-    public GameBoard(int rowSize, int colSize, int landMineCount) {
-        this.rowSize = rowSize;
-        this.colSize = colSize;
-        this.landMineCount = landMineCount;
+    public GameBoard(GameLevel gameLevel) {
+        this.rowSize = gameLevel.getRowSize();
+        this.colSize = gameLevel.getColSize();
+        this.landMineCount = gameLevel.getLandMineCount();
         this.board = new Cell[this.rowSize][this.colSize];
-        // this.landMineCounts = new Integer[this.rowSize][this.colSize];
-        // this.landMines = new boolean[this.rowSize][this.colSize];
     }
 
     public void initialize() {
@@ -84,9 +79,10 @@ public class GameBoard {
     }
 
     public void print() {
-        System.out.println("   a b c d e f g h i j");
+
+        System.out.println("    " + generateColAlpabets());
         for (int row = 0; row < rowSize; row++) {
-            System.out.printf("%d  ", row + 1);
+            System.out.printf("%2d  ", row + 1);
             for (int col = 0; col < colSize; col++) {
                 System.out.print(this.board[row][col].getSign() + " ");
             }
@@ -95,20 +91,17 @@ public class GameBoard {
         System.out.println();
     }
 
+    private String generateColAlpabets() {
+        List<String> alpabets = IntStream.range(0, getColSize())
+            .mapToObj(idx -> (char)('a'+idx))
+            .map(String::valueOf)
+            .toList();
+        return String.join(" ", alpabets);
+    }
+
     public String getSign (int row, int col) {
         return this.board[row][col].getSign();
 
-    }
-
-    public void printLandMine() {
-        System.out.println("   a b c d e f g h i j");
-        for (int row = 0; row < rowSize; row++) {
-            System.out.printf("%d  ", row + 1);
-            for (int col = 0; col < colSize; col++) {
-                System.out.print((this.board[row][col].isLandMineCell() ? "1" : "0") + " ");
-            }
-            System.out.println();
-        }
     }
 
     private boolean isLandMineCell(int row, int col) {
