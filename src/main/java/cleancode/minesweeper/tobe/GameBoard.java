@@ -1,9 +1,7 @@
 package cleancode.minesweeper.tobe;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import cleancode.minesweeper.tobe.cell.Cell;
 import cleancode.minesweeper.tobe.cell.CountCell;
@@ -85,27 +83,6 @@ public class GameBoard {
             count++;
         }
         return count;
-    }
-
-    public void print() {
-
-        System.out.println("    " + generateColAlpabets());
-        for (int row = 0; row < rowSize; row++) {
-            System.out.printf("%2d  ", row + 1);
-            for (int col = 0; col < colSize; col++) {
-                System.out.print(this.board[row][col].getSign() + " ");
-            }
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-    private String generateColAlpabets() {
-        List<String> alpabets = IntStream.range(0, getColSize())
-            .mapToObj(idx -> (char)('a'+idx))
-            .map(String::valueOf)
-            .toList();
-        return String.join(" ", alpabets);
     }
 
     public String getSign (int row, int col) {
