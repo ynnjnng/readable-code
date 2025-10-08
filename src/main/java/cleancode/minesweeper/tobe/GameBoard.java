@@ -14,6 +14,7 @@ public class GameBoard {
     private final int rowSize, colSize, landMineCount;
     
     
+    
     private boolean isFindLandMine = false;
 
     public GameBoard(int rowSize, int colSize, int landMineCount) {
@@ -43,6 +44,14 @@ public class GameBoard {
                 this.board[row][col] = Cell.ofNearbyLandMineCount(this.getNearbyLandMineCount(row, col));
             }
         }
+    }
+
+    public int getRowSize() {
+        return rowSize;
+    }
+
+    public int getColSize() {
+        return colSize;
     }
 
     private int getNearbyLandMineCount(int row, int col) {
@@ -83,6 +92,12 @@ public class GameBoard {
             }
             System.out.println();
         }
+        System.out.println();
+    }
+
+    public String getSign (int row, int col) {
+        return this.board[row][col].getSign();
+
     }
 
     public void printLandMine() {
