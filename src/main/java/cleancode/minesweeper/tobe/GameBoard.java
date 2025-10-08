@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import cleancode.minesweeper.tobe.cell.Cell;
+import cleancode.minesweeper.tobe.cell.CountCell;
+import cleancode.minesweeper.tobe.cell.EmptyCell;
+import cleancode.minesweeper.tobe.cell.LandMineCell;
 import cleancode.minesweeper.tobe.gamelevel.GameLevel;
 
 public class GameBoard {
@@ -28,7 +32,7 @@ public class GameBoard {
             int col = new Random().nextInt(colSize);
             int row = new Random().nextInt(rowSize);
             //this.landMines[row][col] = true;
-            this.board[row][col] = Cell.ofLandMine();
+            this.board[row][col] = new LandMineCell();
         }
         
         for (int row = 0; row < rowSize; row++) {
@@ -36,7 +40,12 @@ public class GameBoard {
                 if (isLandMineCell(row, col)) {
                     continue;
                 }
-                this.board[row][col] = Cell.ofNearbyLandMineCount(this.getNearbyLandMineCount(row, col));
+                int count = this.getNearbyLandMineCount(row, col);
+                if (count > 0) {
+                    this.board[row][col] = new CountCell(count);
+                } else {
+                    this.board[row][col] = new EmptyCell();
+                }
             }
         }
     }

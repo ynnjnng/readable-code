@@ -14,7 +14,7 @@ public class Advanced implements GameLevel {
     
     @Override
     public int getLandMineCount() {
-        return 15;
+        return 30;
     }
 
 }
